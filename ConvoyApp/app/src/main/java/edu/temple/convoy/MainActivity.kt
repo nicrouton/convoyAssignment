@@ -34,6 +34,9 @@ class MainActivity : AppCompatActivity() {
             params["password"] = password
             val requestQueue = Volley.newRequestQueue(this)
 
+            // getSharedPreferences(file name) or getPreferences(MODE_PRIVATE) in main or service to save
+            // might need file object as well
+
             //val stringRequest = StringRequest()
 
         }
