@@ -3,8 +3,10 @@ package edu.temple.convoy
 import android.app.DownloadManager.Request
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
@@ -16,7 +18,13 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.POST
 
+
+private const val loginAction = "LOGIN"
+private const val registerAction = "REGISTER"
+private const val logoutAction = "LOGOUT"
+
 class MainActivity : AppCompatActivity() {
+    val loginTextView = findViewById<TextView>(R.id.loginAccountTextView)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -25,6 +33,8 @@ class MainActivity : AppCompatActivity() {
         var username: String
         var password: String
         var sessionKey: String
+        val URL ="https://kamorris.com/lab/convoy/account.php"
+
 
 
         // Retrofit instance to create an instance of your API service
@@ -35,7 +45,7 @@ class MainActivity : AppCompatActivity() {
 
 
 
-
+        // if the log in button is pressed, program makes a POST request
         findViewById<Button>(R.id.accountAccessButton).setOnClickListener {
             username = findViewById<EditText>(R.id.userEditText).text.toString()
             password = findViewById<EditText>(R.id.passwordEditText).text.toString()
@@ -47,22 +57,33 @@ class MainActivity : AppCompatActivity() {
             params["username"] = username
             params["password"] = password
 
-            val requestBody = RequestRegistration("value1", "value2", "b", "sd", "") // create an instance of your request body
+            val requestBody = RequestUserLogin(loginAction, username, password) // create an instance of your request body
             val call = apiService.postData(requestBody)
 
             //  Make sure to replace "endpoint" with your actual API endpoint and define MyResponse accordingly.
             call.enqueue(object : Callback<ResponseData> {
                 override fun onResponse(call: Call<ResponseData>, response: Response<ResponseData>) {
                     if (response.isSuccessful) {
+                        Log.d("POST request Success", "onResponse success")
                         val myResponse = response.body()
                         // Handle successful response
+                        loginTextView.text = myResponse.toString()
+
+                        /*JsonObjectRequest(URL, {
+                                               // Called if request is successful
+                        }, {
+                            // Called if request is a failure
+
+                        })*/
                     } else {
                         // Handle error response
+                        Log.d("POST request ERROR", "onResponse error")
                     }
                 }
 
                 override fun onFailure(call: Call<ResponseData>, t: Throwable) {
                     // Handle network error
+                    Log.d("Network Failure onResponse", "Network error")
                 }
             })
 
