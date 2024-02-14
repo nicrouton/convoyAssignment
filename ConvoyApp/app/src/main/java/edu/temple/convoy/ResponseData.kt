@@ -14,6 +14,6 @@ In case of an error, the message string will contain a description of the error 
  */
 data class ResponseData(
     @SerializedName("status") val status: String?,
-    @SerializedName("sessionkey") val sessionKey: String?
+    @SerializedName("session_key") val sessionKey: String?
 )
 

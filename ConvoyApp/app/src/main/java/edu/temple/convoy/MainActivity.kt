@@ -1,6 +1,7 @@
 package edu.temple.convoy
 
 import android.app.DownloadManager.Request
+import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -23,7 +24,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.POST
 
-
+private const val LOGIN_STORAGE_KEY = "login_storage_key"
+private const val MAIN_SHAREDPREF = "main_sharedpref"
 private const val loginAction = "LOGIN"
 private const val registerAction = "REGISTER"
 private const val logoutAction = "LOGOUT"
@@ -69,37 +71,28 @@ class MainActivity : AppCompatActivity() {
             val requestBody = RequestUserLogin(loginAction, username, password) // create an instance of your request body
             scope.launch {
                 Log.d("Coroutine launch", "Code in Coroutine scope(main) running")
-                //val call = apiService.registerUser(loginAction, username, password)
-                //  Make sure to replace "endpoint" with your actual API endpoint and define MyResponse accordingly.
-                /*call.enqueue(object : Callback<ResponseData> {
-                    override fun onResponse(call: Call<ResponseData>, response: Response<ResponseData>) {
-                        if (response.isSuccessful) {
-                            Log.d("POST request Success", "onResponse success")
-                            val myResponse = response.body()
-                            // Handle successful response
-                            loginTextView.text = myResponse.toString()
 
-                        } else {
-                            // Handle error response
-                            Log.d("POST request ERROR", "onResponse error")
-                        }
-                    }
-
-                    override fun onFailure(call: Call<ResponseData>, t: Throwable) {
-                        // Handle network error
-                        Log.d("Network Failure onResponse", "Network error")
-                    }
-                })
-            }*/
                 try {
                     val response = apiService.loginUser(loginAction, username, password)
                     if (response.isSuccessful) {
                         val responseData = response.body()
                         if (responseData != null) {
                             Log.d("POST request Success", "onResponse success")
-                            loginTextView.text = responseData.toString()
-                        } else {
-                            Log.d("POST request Success", "Response body is null")
+                            val responseJSON = responseData.toString()
+
+                            // save the response data
+                            saveDataToSharedPreferences(this@MainActivity, LOGIN_STORAGE_KEY, responseData.toString())
+
+                            // if the response is successful
+                            if (responseJSON.contains("SUCCESS")) {
+                                val mainConvoyIntent =
+                                    Intent(this@MainActivity, MainConvoy::class.java)
+                                mainConvoyIntent.putExtra(MAIN_SHAREDPREF, LOGIN_STORAGE_KEY)
+                                startActivity(mainConvoyIntent)
+                                Log.d("POST request Success", "Response body is null")
+                            } else {
+                                loginTextView.text = "Login Failed."
+                            }
                         }
                     } else {
                         Log.d("POST request ERROR", "Response code: ${response.code()}")
@@ -108,8 +101,6 @@ class MainActivity : AppCompatActivity() {
                     Log.e("Network Failure onResponse", "Error: ${e.message}", e)
                 }
             }
-
-
 
 
 
@@ -142,4 +133,12 @@ object RetrofitInstance {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
+}
+
+// function to save the response data to shared preferences
+fun saveDataToSharedPreferences(context: Context, key: String, jsonData: String) {
+    val sharedPref = context.getSharedPreferences("YourSharedPrefName", Context.MODE_PRIVATE)
+    val editor = sharedPref.edit()
+    editor.putString(key, jsonData)
+    editor.apply()
 }
