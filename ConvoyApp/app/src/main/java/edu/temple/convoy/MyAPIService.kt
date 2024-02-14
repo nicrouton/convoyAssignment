@@ -54,10 +54,23 @@ interface MyApiService {
         @Field("username") username: String,
         @Field("session_key") sessionKey: String
     ): Response<ResponseData> // Adjust the return type accordingly
-    /*fun postData(@Body requestBody: RequestRegistration): Call<ResponseData> // replace MyResponse with the response data class
 
-    // polymorphic versions of postData for REquestLogin and RequestLogout
-    fun postData(@Body requestBody: RequestUserLogin): Call<ResponseData>
-    fun postData(@Body requestBody: RequestLogout): Call<ResponseData>*/
+    @FormUrlEncoded
+    @POST("convoy.php")
+    suspend fun createConvoy(
+        @Field("action") action: String,
+        @Field("username") username: String,
+        @Field("session_key") sessionKey: String
+    ): Response<ResponseData>
+
+    @FormUrlEncoded
+    @POST("account.php")
+    suspend fun endConvoy(
+        @Field("action") action: String,
+        @Field("username") username: String,
+        @Field("session_key") sessionKey: String,
+        @Field("session_key") convoyId: String
+    ): Response<ResponseData>
+
 
 }

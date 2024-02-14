@@ -109,13 +109,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            // add account createAccountButtom functionality
-            findViewById<Button>(R.id.createAccountButton).setOnClickListener {
-                // launch new activity for account creation when button pressed
-                Log.d("Account Creation","Launch account creation")
-                val creationIntent = Intent(this, AccountCreationActivity::class.java)
-                startActivity(creationIntent)
-            }
+
 
 
 
@@ -126,7 +120,16 @@ class MainActivity : AppCompatActivity() {
             //val stringRequest = StringRequest()
 
         }
+
+        // add account createAccountButtom functionality
+        findViewById<Button>(R.id.createAccountButton).setOnClickListener {
+            // launch new activity for account creation when button pressed
+            Log.d("Account Creation","Launch account creation")
+            val creationIntent = Intent(this@MainActivity, AccountCreationActivity::class.java)
+            startActivity(creationIntent)
+        }
     }
+
 }
 
 object RetrofitInstance {
