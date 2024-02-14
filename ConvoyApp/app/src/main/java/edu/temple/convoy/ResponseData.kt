@@ -1,5 +1,7 @@
 package edu.temple.convoy
 
+import com.google.gson.annotations.SerializedName
+
 /*
 Data class for server's response
 
@@ -10,4 +12,8 @@ Either:
 In case of an error, the message string will contain a description of the error encountered
 
  */
-data class ResponseData(val status: String, val sessionKey: String)
+data class ResponseData(
+    @SerializedName("status") val status: String?,
+    @SerializedName("sessionkey") val sessionKey: String?
+)
+
