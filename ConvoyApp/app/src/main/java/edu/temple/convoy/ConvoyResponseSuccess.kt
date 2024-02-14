@@ -1,3 +1,10 @@
 package edu.temple.convoy
 
-data class ConvoyResponseSuccess()
+import com.google.gson.annotations.SerializedName
+
+data class ConvoyResponseSuccess(
+    @SerializedName("status") val status: String?,
+    @SerializedName("convoy_id") val sessionKey: String?,
+    @SerializedName("firstname") val firstname: String?,
+    @SerializedName("lastname") val lastname: String?,
+)
