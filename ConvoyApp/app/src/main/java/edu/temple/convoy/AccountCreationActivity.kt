@@ -1,5 +1,6 @@
 package edu.temple.convoy
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -9,6 +10,9 @@ import android.widget.TextView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
+private const val REGISTER_STORAGE_KEY = "register_storage_key"
+private const val ACCOUNT_CREATION_SHAREDPREF = "creation_sharedpref"
 
 class AccountCreationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,6 +32,8 @@ class AccountCreationActivity : AppCompatActivity() {
 
         val apiService = RetrofitInstance.retrofit.create(MyApiService::class.java)
 
+        val accountCreationTitle = findViewById<TextView>(R.id.accountCreationTextView)
+
 
         findViewById<Button>(R.id.createAccountFirstButton).setOnClickListener {
             //
@@ -35,16 +41,35 @@ class AccountCreationActivity : AppCompatActivity() {
 
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    val response = apiService.registerUser("create", username, firstname, lastname, password)
-                    if (response.isSuccessful) {
-                        // Account created successfully, handle accordingly
-                        findViewById<TextView>(R.id.accountCreationTextView).text = response.toString()
+                    val responseRegister = apiService.registerUser("create", username, firstname, lastname, password)
+                    if (responseRegister.isSuccessful) {
+                        // Account created successfully
 
+
+                        // store the response body in a variable
+                        val regResponse = responseRegister.toString()
+                        Log.d("Account Creation Response", regResponse)
+
+                        // save the response
+                        // save the response data
+                        saveDataToSharedPreferences(this@AccountCreationActivity, REGISTER_STORAGE_KEY, regResponse)
+
+                        // if the response is successful, start the main convoy, otherwise inform the user of the failure
+                        if (regResponse.contains("OK")) {
+                            // intent variable to switch
+                            val mainConvoyIntent =
+                                Intent(this@AccountCreationActivity, MainConvoy::class.java)
+                            mainConvoyIntent.putExtra(ACCOUNT_CREATION_SHAREDPREF, REGISTER_STORAGE_KEY)
+                            startActivity(mainConvoyIntent)
+                            Log.d("POST request Success", "Response body is null")
+                        } else {
+                            accountCreationTitle.text = "Account couldn't be created."
+                        }
                         // For example, you can navigate to another activity
                         //startActivity(Intent(this@AccountCreation, AnotherActivity::class.java))
                     } else {
                         // Handle error response
-                        Log.e("Account Creation Error", "Response code: ${response.code()}")
+                        Log.e("Account Creation Error", "Response code:")
                         // You can show a message to the user indicating the failure
                     }
                 } catch (e: Exception) {

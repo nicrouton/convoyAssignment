@@ -83,7 +83,7 @@ class MainActivity : AppCompatActivity() {
                             // save the response data
                             saveDataToSharedPreferences(this@MainActivity, LOGIN_STORAGE_KEY, responseData.toString())
 
-                            // if the response is successful
+                            // if the response is successful, start the main convoy, otherwise inform the user of the failure
                             if (responseJSON.contains("SUCCESS")) {
                                 val mainConvoyIntent =
                                     Intent(this@MainActivity, MainConvoy::class.java)
