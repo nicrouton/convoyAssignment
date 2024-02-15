@@ -156,7 +156,7 @@ class MainConvoy : AppCompatActivity(), OnMapReadyCallback {
 }
 
 // function to create convoy
-suspend fun createConvoy(context: Context, sessionKey: String, user: String) : ConvoyResponseSuccess {
+suspend fun createConvoy(context: Context, sessionKey: String, user: String) {
     // Retrofit instance to create an instance of your API service
     val apiService = RetrofitInstance.retrofit.create(MyApiService::class.java)
 
@@ -174,7 +174,7 @@ suspend fun createConvoy(context: Context, sessionKey: String, user: String) : C
                 // parse out the different parts of the JSON data
                 val gson = Gson()
 
-                return gson.fromJson(responseJSON, ConvoyResponseSuccess::class.java)
+                val stringR = gson.fromJson(responseJSON, ConvoyResponseSuccess::class.java)
             }
         }
 
