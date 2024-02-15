@@ -4,10 +4,11 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.LocationListener
 import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
+import android.widget.Button
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -18,6 +19,10 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 import java.sql.Types.NULL
 
@@ -37,6 +42,7 @@ class MainConvoy : AppCompatActivity(), OnMapReadyCallback {
     lateinit var long: TextView
 
     lateinit var convoyID : TextView
+    lateinit var createButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +51,8 @@ class MainConvoy : AppCompatActivity(), OnMapReadyCallback {
         // map view variable
         mapV = findViewById(R.id.convoyMapView)
         convoyID = findViewById(R.id.convoyIDTextView)
+        createButton = findViewById(R.id.createConvoyButton)
+
 
         mapV.onCreate(savedInstanceState)
         mapV.getMapAsync(this)
@@ -64,6 +72,19 @@ class MainConvoy : AppCompatActivity(), OnMapReadyCallback {
         val loginSharedSession = sharedLoginConvoyID.getString(receivedSession, null)
         val loginSharedUsername = sharedLoginUser.getString("username", null)
         val sharedCreationConvoyID = getSharedPreferences("login_storage_key", Context.MODE_PRIVATE)
+
+        // when the create convoy button is clicked run the function in a Coroutine
+        createButton.setOnClickListener {
+            // coroutine scope
+            val scope = CoroutineScope(Job() + Dispatchers.Main)
+            scope.launch {
+                if (loginSharedUsername != null) {
+                    if (loginSharedSession != null) {
+                        createConvoy(this@MainConvoy, loginSharedSession, loginSharedUsername)
+                    }
+                }
+            }
+        }
 
 
         // checks if user granted permission
@@ -91,6 +112,8 @@ class MainConvoy : AppCompatActivity(), OnMapReadyCallback {
         val coordinates = LatLng(0.0, 0.0) // Set default coordinates
         val markerOptions = MarkerOptions().position(coordinates).title("Default Marker")
         googleMap.addMarker(markerOptions)
+
+
     }
 
     override fun onResume() {
@@ -133,13 +156,27 @@ class MainConvoy : AppCompatActivity(), OnMapReadyCallback {
 }
 
 // function to create convoy
-suspend fun createConvoy(context: Context, sessionKey: String, user: String) {
+suspend fun createConvoy(context: Context, sessionKey: String, user: String) : ConvoyResponseSuccess {
     // Retrofit instance to create an instance of your API service
     val apiService = RetrofitInstance.retrofit.create(MyApiService::class.java)
 
     // send a post request to create a convoy
     try {
         val responseConvoy = apiService.createConvoy("CREATE", user, sessionKey)
+
+        if (responseConvoy.isSuccessful) {
+            val responseData = responseConvoy.body()
+
+            if (responseData != null) {
+                Log.d("POST request Success", "onResponse success")
+                val responseJSON = responseData.toString()
+
+                // parse out the different parts of the JSON data
+                val gson = Gson()
+
+                return gson.fromJson(responseJSON, ConvoyResponseSuccess::class.java)
+            }
+        }
 
     } catch (e: Exception) {
 
