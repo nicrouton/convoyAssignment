@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 
 private const val REGISTER_STORAGE_KEY = "register_storage_key"
 private const val ACCOUNT_CREATION_SHAREDPREF = "creation_sharedpref"
+private const val CREATED = "created"
 
 class AccountCreationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,11 +31,13 @@ class AccountCreationActivity : AppCompatActivity() {
         var firstname = firsnameEdit.text.toString()
         var lastname = lastnameEdit.text.toString()
 
+
         val apiService = RetrofitInstance.retrofit.create(MyApiService::class.java)
 
         val accountCreationTitle = findViewById<TextView>(R.id.accountCreationTextView)
 
 
+        // on click listener for account creation button
         findViewById<Button>(R.id.createAccountFirstButton).setOnClickListener {
             //
             val requestBody = RequestRegistration("create", username, firstname, lastname, password)
@@ -52,7 +55,7 @@ class AccountCreationActivity : AppCompatActivity() {
 
                         // save the response
                         // save the response data
-                        saveDataToSharedPreferences(this@AccountCreationActivity, REGISTER_STORAGE_KEY, regResponse)
+                        saveDataToSharedPreferences(this@AccountCreationActivity, "created", REGISTER_STORAGE_KEY, regResponse)
 
                         // if the response is successful, start the main convoy, otherwise inform the user of the failure
                         if (regResponse.contains("OK")) {
@@ -69,7 +72,7 @@ class AccountCreationActivity : AppCompatActivity() {
                         //startActivity(Intent(this@AccountCreation, AnotherActivity::class.java))
                     } else {
                         // Handle error response
-                        Log.e("Account Creation Error", "Response code:")
+                        Log.e("Account Creation Error", "Response error")
                         // You can show a message to the user indicating the failure
                     }
                 } catch (e: Exception) {

@@ -2,6 +2,7 @@ package edu.temple.convoy
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationListener
 import android.location.LocationManager
@@ -9,12 +10,15 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.gson.Gson
+
 import java.sql.Types.NULL
 
 // activity that shows buttons to start, join and leave a convoy
@@ -49,13 +53,18 @@ class MainConvoy : AppCompatActivity(), OnMapReadyCallback {
 
 
         // get the convoy id from shared preferences
-        val sharedLoginConvoyID = getSharedPreferences("response", Context.MODE_PRIVATE)
 
-        val loginSharedResponse = sharedLoginConvoyID.getString("response", null)
+        val sharedLoginConvoyID = getSharedPreferences("response", Context.MODE_PRIVATE)
+        val sharedLoginUser = getSharedPreferences("username", Context.MODE_PRIVATE)
+
+        // get intent for whatever activity started this one
+        val receivedSession = intent.getStringExtra("main_sharedpref")
+
+
+        val loginSharedSession = sharedLoginConvoyID.getString(receivedSession, null)
+        val loginSharedUsername = sharedLoginUser.getString("username", null)
         val sharedCreationConvoyID = getSharedPreferences("login_storage_key", Context.MODE_PRIVATE)
-        if (loginSharedResponse != null) {
-            convoyID.text = loginSharedResponse
-        }
+
 
         // checks if user granted permission
         if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -124,8 +133,22 @@ class MainConvoy : AppCompatActivity(), OnMapReadyCallback {
 }
 
 // function to create convoy
-fun createConvoy() {
+suspend fun createConvoy(context: Context, sessionKey: String, user: String) {
+    // Retrofit instance to create an instance of your API service
+    val apiService = RetrofitInstance.retrofit.create(MyApiService::class.java)
+
+    // send a post request to create a convoy
+    try {
+        val responseConvoy = apiService.createConvoy("CREATE", user, sessionKey)
+
+    } catch (e: Exception) {
+
+    }
+
     // start foreground service that provides location updates
+    val serviceIntent = Intent(context, UpdateLocService::class.java)
+    context.startService(serviceIntent)
+
 
 }
 

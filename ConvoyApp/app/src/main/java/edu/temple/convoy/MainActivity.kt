@@ -12,6 +12,7 @@ import android.widget.TextView
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -26,6 +27,7 @@ import retrofit2.http.POST
 
 private const val LOGIN_STORAGE_KEY = "login_storage_key"
 private const val MAIN_SHAREDPREF = "main_sharedpref"
+private const val LOGIN_USERNAME = "username"
 private const val loginAction = "LOGIN"
 private const val registerAction = "REGISTER"
 private const val logoutAction = "LOGOUT"
@@ -80,14 +82,27 @@ class MainActivity : AppCompatActivity() {
                             Log.d("POST request Success", "onResponse success")
                             val responseJSON = responseData.toString()
 
-                            // save the response data
-                            saveDataToSharedPreferences(this@MainActivity, LOGIN_STORAGE_KEY, responseData.toString())
+                            // parse out the different parts of the JSON data
+                            val gson = Gson()
+                            val loginInfo : ResponseData = gson.fromJson(responseJSON, ResponseData::class.java)
+
+
+                            // save the response data(session key)
+                            loginInfo.sessionKey?.let { it1 ->
+                                saveDataToSharedPreferences(this@MainActivity, "response", LOGIN_STORAGE_KEY,
+                                    it1
+                                )
+                            }
+
+                            saveDataToSharedPreferences(this@MainActivity, "username", LOGIN_USERNAME, username)
+
 
                             // if the response is successful, start the main convoy, otherwise inform the user of the failure
                             if (responseJSON.contains("SUCCESS")) {
                                 val mainConvoyIntent =
                                     Intent(this@MainActivity, MainConvoy::class.java)
                                 mainConvoyIntent.putExtra(MAIN_SHAREDPREF, LOGIN_STORAGE_KEY)
+
                                 startActivity(mainConvoyIntent)
                                 Log.d("POST request Success", "Response body is null")
                             } else {
@@ -136,8 +151,8 @@ object RetrofitInstance {
 }
 
 // function to save the response data to shared preferences
-fun saveDataToSharedPreferences(context: Context, key: String, jsonData: String) {
-    val sharedPref = context.getSharedPreferences("response", Context.MODE_PRIVATE)
+fun saveDataToSharedPreferences(context: Context, fileName:String, key: String, jsonData: String) {
+    val sharedPref = context.getSharedPreferences(fileName, Context.MODE_PRIVATE)
     val editor = sharedPref.edit()
     editor.putString(key, jsonData)
     editor.apply()
