@@ -137,7 +137,7 @@ object RetrofitInstance {
 
 // function to save the response data to shared preferences
 fun saveDataToSharedPreferences(context: Context, key: String, jsonData: String) {
-    val sharedPref = context.getSharedPreferences("YourSharedPrefName", Context.MODE_PRIVATE)
+    val sharedPref = context.getSharedPreferences("response", Context.MODE_PRIVATE)
     val editor = sharedPref.edit()
     editor.putString(key, jsonData)
     editor.apply()

@@ -20,5 +20,7 @@ class UpdateLocService : Service() {
 }
 
 fun updateLocation() {
+    // start foreground service that provides location updates
+
 
 }
